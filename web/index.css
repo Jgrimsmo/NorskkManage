@@ -1,0 +1,25 @@
+/* Hide Expo Router web navigation bar */
+[data-expo-router-navigation] {
+  display: none !important;
+}
+
+/* Hide any navigation breadcrumbs */
+.expo-router-navigation,
+.expo-navigation-bar,
+[role="navigation"][aria-label*="breadcrumb"],
+[role="navigation"][aria-label*="navigation"] {
+  display: none !important;
+}
+
+/* Ensure the main content takes full height */
+#__next {
+  height: 100vh;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+}
