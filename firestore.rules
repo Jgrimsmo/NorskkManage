@@ -2,10 +2,41 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // TEMPORARY: Allow all authenticated users to read/write any document
-    // This is for development/testing purposes only
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    // Users can only access their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Projects - users can only access projects they're assigned to
+    match /projects/{projectId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid in resource.data.assignedUsers;
+    }
+    
+    // Timecards - users can only access their own timecards
+    match /timecards/{timecardId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+    }
+    
+    // Equipment - authenticated users can read, only admins can write
+    match /equipment/{equipmentId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Safety reports - users can read/write their own reports
+    match /safety-reports/{reportId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.createdBy;
+    }
+    
+    // Crew management - authenticated users can read, only supervisors can write
+    match /crew/{crewId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'supervisor'];
     }
   }
 }
